@@ -1,0 +1,319 @@
+{
+	"info": {
+		"_postman_id": "2cc7f17e-f08e-464f-a21f-17d323db65da",
+		"name": "rms-qa",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39526718"
+	},
+	"item": [
+		{
+			"name": "Refresh Data",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://alphaibe12.rmscloud.com/onlineapi/GetRefreshData",
+					"protocol": "https",
+					"host": [
+						"alphaibe12",
+						"rmscloud",
+						"com"
+					],
+					"path": [
+						"onlineapi",
+						"GetRefreshData"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAvailRatesData",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();",
+							"const categories = jsonData.categoryRows || [];",
+							"const tariffs = jsonData.categoryRows[0].tariffs || [];",
+							"",
+							"pm.test(\"Response status is 200\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has dateGrid array\", () => {",
+							"  pm.expect(jsonData).to.have.property(\"dateGrid\").that.is.an(\"array\");",
+							"});",
+							"",
+							"pm.test(\"Get arrive and depart from searchCriteria\", () => {",
+							"    const jsonData = pm.response.json();",
+							"    ",
+							"    if (jsonData.searchCriteria) {",
+							"        pm.environment.set(\"arriveDate\", jsonData.searchCriteria.arrive);",
+							"        pm.environment.set(\"departDate\", jsonData.searchCriteria.depart);",
+							"    } else {",
+							"        console.warn(\"searchCriteria not found in response\");",
+							"    }",
+							"});",
+							"",
+							"pm.test(\"Get Bed & Breakfast addCartURL, bookingTariff, and tariffName\", () => {",
+							"    const tariffs = jsonData.categoryRows[0]?.tariffs || []; // defaults to deluxe king suite",
+							"    const bnbTariff = tariffs.find(t => t.tariffName === \"Bed & Breakfast\");",
+							"",
+							"    if (bnbTariff) {",
+							"        pm.environment.set(\"bedAndBreakfastAddCartURL\", bnbTariff.addCartURL || \"\");",
+							"        pm.environment.set(\"bookingTariff\", bnbTariff.bookingTariff || \"\");",
+							"        pm.environment.set(\"tariffName\", bnbTariff.tariffName);",
+							"    } else {",
+							"        console.warn(\"No 'Bed & Breakfast' tariff found.\");",
+							"    }",
+							"});",
+							"",
+							"",
+							"pm.test(\"Categories array exists and is an array\", () => {",
+							"  pm.expect(categories).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"pm.test(\"Each category has required fields with correct types\", () => {",
+							"  categories.forEach(category => {",
+							"    pm.expect(category).to.have.property(\"categoryName\").that.is.a(\"string\").and.not.empty;",
+							"    pm.expect(category).to.have.property(\"categoryDescription\").that.is.a(\"string\").and.not.empty;",
+							"    pm.expect(category).to.have.property(\"currencyCode\").that.is.a(\"string\").and.not.empty;",
+							"    pm.expect(category).to.have.property(\"anyAvailRates\").that.is.a(\"boolean\");",
+							"    pm.expect(category).to.have.property(\"maxOccupancy\").that.is.a(\"number\");",
+							"    pm.expect(category).to.have.property(\"averageNightlyRateFrom\").that.is.a(\"string\");",
+							"  });",
+							"});",
+							"",
+							"",
+							"pm.test(\"Each tariff has required fields with correct types\", () => {",
+							"  tariffs.forEach(tariff => {",
+							"    pm.expect(tariff).to.have.property(\"id\").that.is.a(\"number\");",
+							"    pm.expect(tariff).to.have.property(\"tariffName\").that.is.a(\"string\").and.not.empty;",
+							"    pm.expect(tariff).to.have.property(\"tariffDescription\").that.is.a(\"string\");",
+							"    pm.expect(tariff).to.have.property(\"bookingAllowed\").that.is.a(\"boolean\");",
+							"    pm.expect(tariff).to.have.property(\"isAvailable\").that.is.a(\"boolean\");",
+							"    pm.expect(tariff).to.have.property(\"noOfAvailArrival\").that.is.a(\"number\");",
+							"    pm.expect(tariff).to.have.property(\"addCartURL\").that.is.a(\"string\").and.not.empty;",
+							"    pm.expect(tariff).to.have.property(\"loadCartURL\").that.is.a(\"string\").and.not.empty;",
+							"    pm.expect(tariff).to.have.property(\"nextURL\").that.is.a(\"string\").and.not.empty;",
+							"    pm.expect(tariff).to.have.property(\"maxRoomQuantity\").that.is.a(\"number\");",
+							"",
+							"    // Validate dates is an array",
+							"    pm.expect(tariff).to.have.property(\"dates\").that.is.an(\"array\");",
+							"",
+							"    tariff.dates.forEach(date => {",
+							"      pm.expect(date).to.have.property(\"theDate\").that.is.a(\"string\").and.not.empty;",
+							"      pm.expect(date).to.have.property(\"totalTariff\").that.is.a(\"number\");",
+							"      pm.expect(date).to.have.property(\"totalTTax\").that.is.a(\"number\");",
+							"      pm.expect(date).to.have.property(\"noOfAvail\").that.is.a(\"number\");",
+							"    });",
+							"  });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/OnlineApi/GetAvailRatesData?clientIdFromUrl=22749&onlineAgentId=1&adultsCount={{adultsCount}}&childrenCount=0&infantsCount=0&arrivalDateString=08%2F12%2F2025&D=08%2F13%2F2025&additional1=0&additional2=0&additional3=0&additional4=0&additional5=0&additional6=0&additional7=0&bookingType=3",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"OnlineApi",
+						"GetAvailRatesData"
+					],
+					"query": [
+						{
+							"key": "clientIdFromUrl",
+							"value": "22749"
+						},
+						{
+							"key": "onlineAgentId",
+							"value": "1"
+						},
+						{
+							"key": "adultsCount",
+							"value": "{{adultsCount}}"
+						},
+						{
+							"key": "childrenCount",
+							"value": "0"
+						},
+						{
+							"key": "infantsCount",
+							"value": "0"
+						},
+						{
+							"key": "arrivalDateString",
+							"value": "08%2F12%2F2025"
+						},
+						{
+							"key": "D",
+							"value": "08%2F13%2F2025"
+						},
+						{
+							"key": "additional1",
+							"value": "0"
+						},
+						{
+							"key": "additional2",
+							"value": "0"
+						},
+						{
+							"key": "additional3",
+							"value": "0"
+						},
+						{
+							"key": "additional4",
+							"value": "0"
+						},
+						{
+							"key": "additional5",
+							"value": "0"
+						},
+						{
+							"key": "additional6",
+							"value": "0"
+						},
+						{
+							"key": "additional7",
+							"value": "0"
+						},
+						{
+							"key": "bookingType",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AddBooking",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();",
+							"const cartId = response.cartId;",
+							"pm.environment.set(\"cartId\", cartId);",
+							"",
+							"const adultsCount = parseInt(pm.environment.get(\"adultsCount\"), 10);",
+							"",
+							"pm.test(\"Response status is 200\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Validate ooking response has required top-level fields\", () => {",
+							"  pm.expect(response).to.have.property(\"cartId\").that.is.a(\"string\").and.not.empty;",
+							"  pm.expect(response).to.have.property(\"nGrandTotal\").that.is.a(\"number\");",
+							"  pm.expect(response).to.have.property(\"sCurrencyCode\").that.is.a(\"string\").and.not.empty;",
+							"  pm.expect(response).to.have.property(\"oSiblings\").that.is.an(\"array\");",
+							"});",
+							"",
+							"pm.test(\"Validate addBooking response fields\", () => {",
+							"  const jsonData = pm.response.json();",
+							"  const sibling = jsonData.oSiblings[0];",
+							"",
+							"  const adultsCount = parseInt(pm.environment.get(\"adultsCount\"), 10);",
+							"  const tariffName = pm.environment.get(\"tariffName\");",
+							"  const bookingTariff = parseFloat(pm.environment.get(\"bookingTariff\"));",
+							"  const arriveDate = pm.environment.get(\"arriveDate\");",
+							"  const departDate = pm.environment.get(\"departDate\");",
+							"  const departDate = pm.environment.get(\"roomType\");",
+							"",
+							"  pm.expect(sibling.nAdults).to.eql(adultsCount);",
+							"  pm.expect(sibling.sRate).to.eql(tariffName);",
+							"  pm.expect(sibling.nSubTotal).to.eql(bookingTariff);",
+							"  pm.expect(sibling.dArrival).to.eql(arriveDate);",
+							"  pm.expect(sibling.dDeparture).to.eql(departDate);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}{{addCartURL}}&adults={{adultsCount}}&children=0&infants=0&CartId",
+					"host": [
+						"{{baseUrl}}{{addCartURL}}&adults={{adultsCount}}&children=0&infants=0&CartId"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getCart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Validate getCart response fields match environment variables\", () => {",
+							"    const jsonData = pm.response.json();",
+							"    const sibling = jsonData.oSiblings[0];",
+							"",
+							"    pm.expect(jsonData.cartId).to.eql(pm.environment.get(\"cartId\"));",
+							"    pm.expect(sibling.nAdults).to.eql(parseInt(pm.environment.get(\"adultsCount\"), 10));",
+							"    pm.expect(sibling.nTariff).to.eql(parseFloat(pm.environment.get(\"bookingTariff\")));",
+							"    pm.expect(sibling.sRate).to.eql(pm.environment.get(\"tariffName\"));",
+							"    pm.expect(sibling.dArrival).to.eql(pm.environment.get(\"arriveDate\"));",
+							"    pm.expect(sibling.dDeparture).to.eql(pm.environment.get(\"departDate\"));",
+							"    pm.expect(sibling.sRoom).to.eql(pm.environment.get(\"roomType\"));",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response status is 200\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/OnlineApi/GetCart?clientId=22749&agentId=1&CartId={{cartId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"OnlineApi",
+						"GetCart"
+					],
+					"query": [
+						{
+							"key": "clientId",
+							"value": "22749"
+						},
+						{
+							"key": "agentId",
+							"value": "1"
+						},
+						{
+							"key": "CartId",
+							"value": "{{cartId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
