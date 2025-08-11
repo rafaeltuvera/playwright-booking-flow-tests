@@ -19,8 +19,8 @@ This project contains end-to-end (E2E) tests for the booking flow of a hotel res
 1. **Clone the repository:**
 
    ```bash
-   git clone <repository-url>
-   cd <repository-folder>
+   git clone https://github.com/rafaeltuvera/playwright-booking-flow-tests.git
+   cd playwright-booking-flow-tests
 
 2. **Install dependencies:**
 
