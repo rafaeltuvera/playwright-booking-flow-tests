@@ -38,8 +38,8 @@ test('Mobile Booking Flow', async ({ page }) => {
     await homePage.validateRooms();
     await homePage.selectSuiteRate('Deluxe King', 'Bed & Breakfast');
 
-    await page.getByTestId('cartContentComponent').waitFor({ state: 'visible' });
-    await expect(page.getByTestId('cart-item-title-1')).toHaveText('Deluxe King');
+    await homePage.waitForCartVisible()
+    await homePage.expectCartItemTitle('Deluxe King')
     await homePage.validateCartContent();
     await homePage.validateCartDates(fromDate, toDate);
     await homePage.clickCheckout();
