@@ -37,9 +37,8 @@ test('Desktop Booking Flow', async ({page}) => {
     await homePage.selectSuiteRate('Deluxe King', 'Bed & Breakfast');
 
     // Cart Flow
-    const cartComponent = page.getByTestId('cartContentComponent');
-    await cartComponent.waitFor({state: 'visible'});
-    await expect(page.getByTestId('cart-item-title-1')).toHaveText('Deluxe King');
+    await homePage.waitForCartVisible()
+    await homePage.expectCartItemTitle('Deluxe King')
     await homePage.validateCartContent();
     await homePage.validateCartDates(fromDate, toDate);
     await homePage.clickCheckout();
