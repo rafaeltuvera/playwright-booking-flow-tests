@@ -30,7 +30,7 @@ export class HomePage {
         cartCheckout: 'cart-item-checkout-1',
         roomPriceListItem: 'room-price-list-item',
         priceTitle: 'price-title',
-        addToCartButton: 'add-to-cart-btn-rates-page', // Added here
+        addToCartButton: 'add-to-cart-btn-rates-page',
     };
 
     // Navigate to homepage
@@ -134,5 +134,13 @@ export class HomePage {
 
         // Click the "Add to Cart" button for the selected rate
         await rate.getByTestId(this.pageElements.addToCartButton).first().click();
+    }
+
+    async waitForCartVisible() {
+        await this.page.getByTestId(this.pageElements.cartComponent).waitFor({ state: 'visible' });
+    }
+
+    async expectCartItemTitle(expectedTitle: string) {
+        await expect(this.page.getByTestId(this.pageElements.cartItemTitle)).toHaveText(expectedTitle);
     }
 }
